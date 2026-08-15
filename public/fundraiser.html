@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Planation Stars Blue | Cooperstown Fundraiser</title>
+
+  <meta
+    name="description"
+    content="Support Planation Stars Blue on the Road to Cooperstown."
+  />
+
+  <style>
+    :root {
+      --bg: #050816;
+      --panel: #10172d;
+      --panel2: #151d39;
+
+      --navy: #101641;
+      --navy-light: #263575;
+
+      --red: #f5222d;
+      --red-dark: #a50f17;
+
+      --white: #ffffff;
+      --silver: #d9dde8;
+      --muted: #a8afbf;
+
+      --success: #35e59b;
+      --danger: #ff5964;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      color: var(--white);
+
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(245, 34, 45, 0.14),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 80% 20%,
+          rgba(38, 53, 117, 0.2),
+          transparent 30%
+        ),
+        linear-gradient(
+          180deg,
+          #081126 0%,
+          #040711 100%
+        );
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page-shell {
+      width: min(1180px, 94%);
+      margin: 0 auto;
+      padding: 28px 0 70px;
+    }
+
+    .back-to-team {
+      display: inline-block;
+
+      margin-bottom: 22px;
+
+      color: #ff6a72;
+
+      text-decoration: none;
+
+      font-size: 14px;
+      font-weight: 900;
+
+      letter-spacing: 0.06em;
+
+      text-transform: uppercase;
+    }
+
+    .back-to-team:hover {
+      color: white;
+    }
+
+    .hero {
+      text-align: center;
+
+      margin-bottom: 28px;
+    }
+
+    .team-logo {
+      display: block;
+
+      width: min(440px, 86vw);
+      height: auto;
+
+      margin: 0 auto 22px;
+
+      object-fit: contain;
+
+      filter:
+        drop-shadow(
+          0 0 22px
+          rgba(245, 34, 45, 0.2)
+        );
+    }
+
+    .team-kicker {
+      margin-bottom: 12px;
+
+      color: var(--red);
+
+      font-size: 13px;
+      font-weight: 900;
+
+      letter-spacing: 0.24em;
+
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      margin: 0;
+
+      font-size:
+        clamp(
+          48px,
+          9vw,
+          100px
+        );
+
+      line-height: 0.86;
+
+      font-weight: 1000;
+      font-style: italic;
+
+      letter-spacing: -0.045em;
+
+      text-transform: uppercase;
+
+      text-shadow:
+        4px 4px 0 var(--navy-light),
+        7px 7px 0 rgba(245, 34, 45, 0.35);
+    }
+
+    .hero-title .road {
+      display: block;
+
+      color: white;
+    }
+
+    .hero-title .coop {
+      display: block;
+
+      margin-top: 10px;
+
+      color: var(--red);
+    }
+
+    .player-header {
+      max-width: 760px;
+
+      margin: 34px auto 0;
+
+      padding: 20px;
+
+      text-align: center;
+
+      border:
+        2px solid
+        rgba(245, 34, 45, 0.52);
+
+      border-radius: 18px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(16, 23, 45, 0.96),
+          rgba(5, 8, 22, 0.96)
+        );
+    }
+
+    .supporting-label {
+      margin-bottom: 7px;
+
+      color: #ff6a72;
+
+      font-size: 12px;
+      font-weight: 900;
+
+      letter-spacing: 0.16em;
+
+      text-transform: uppercase;
+    }
+
+    .player-name {
+      margin: 0;
+
+      font-size:
+        clamp(
+          28px,
+          5vw,
+          46px
+        );
+
+      font-weight: 1000;
+
+      text-transform: uppercase;
+    }
+
+    .player-message {
+      max-width: 700px;
+
+      margin: 16px auto 0;
+
+      text-align: center;
+
+      color: var(--silver);
+
+      line-height: 1.55;
+    }
+
+    .progress-card {
+      max-width: 760px;
+
+      margin: 28px auto;
+
+      padding: 20px 22px;
+
+      border:
+        2px solid
+        rgba(255, 255, 255, 0.2);
+
+      border-radius: 18px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(16, 23, 45, 0.96),
+          rgba(5, 8, 22, 0.96)
+        );
+    }
+
+    .progress-top {
+      display: flex;
+
+      justify-content: space-between;
+      gap: 18px;
+
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 18px;
+
+      margin-top: 16px;
+
+      overflow: hidden;
+
+      border-radius: 999px;
+
+      background: #252d46;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+
+      border-radius: inherit;
+
+      background:
+        linear-gradient(
+          90deg,
+          var(--navy-light),
+          var(--red),
+          #ff7178
+        );
+
+      transition: width 0.35s ease;
+    }
+
+    .instructions {
+      max-width: 760px;
+
+      margin: 30px auto 18px;
+
+      text-align: center;
+
+      color: var(--silver);
+
+      line-height: 1.6;
+    }
+
+    .instructions strong {
+      color: #ff6a72;
+    }
+
+    .example {
+      display: inline-block;
+
+      margin-top: 12px;
+
+      padding: 10px 14px;
+
+      border-radius: 10px;
+
+      background: var(--panel2);
+
+      color: white;
+
+      font-weight: 800;
+    }
+
+    .status-box {
+      max-width: 760px;
+
+      margin: 18px auto;
+
+      padding: 14px 16px;
+
+      border-radius: 12px;
+
+      text-align: center;
+
+      background:
+        rgba(255, 255, 255, 0.05);
+
+      color: #ff7a81;
+
+      font-weight: 800;
+    }
+
+    .status-box.error {
+      color: #ffd5d8;
+
+      background:
+        rgba(255, 89, 100, 0.12);
+
+      border:
+        1px solid
+        rgba(255, 89, 100, 0.35);
+    }
+
+    .status-box.success {
+      color: #c9ffe9;
+
+      background:
+        rgba(53, 229, 155, 0.11);
+
+      border:
+        1px solid
+        rgba(53, 229, 155, 0.35);
+    }
+
+    .baseball-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          10,
+          minmax(0, 1fr)
+        );
+
+      gap: 11px;
+
+      max-width: 1040px;
+
+      margin: 0 auto;
+    }
+
+    .ball {
+      position: relative;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      aspect-ratio: 1 / 1;
+
+      border:
+        2px solid
+        rgba(255, 255, 255, 0.2);
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          #ffffff 0%,
+          #ededed 42%,
+          #cfcfd3 72%,
+          #9f9fa6 100%
+        );
+
+      color: #111;
+
+      font-size:
+        clamp(
+          12px,
+          1.7vw,
+          18px
+        );
+
+      font-weight: 1000;
+
+      cursor: pointer;
+
+      box-shadow:
+        inset
+        -5px
+        -7px
+        10px
+        rgba(0, 0, 0, 0.16);
+
+      transition:
+        transform 0.12s ease,
+        border-color 0.12s ease,
+        box-shadow 0.12s ease;
+    }
+
+    .ball::before,
+    .ball::after {
+      content: "";
+
+      position: absolute;
+
+      width: 48%;
+      height: 68%;
+
+      border:
+        2px
+        dashed
+        #cf2732;
+
+      border-top: none;
+      border-bottom: none;
+
+      border-radius: 50%;
+
+      opacity: 0.5;
+    }
+
+    .ball::before {
+      left: 5%;
+    }
+
+    .ball::after {
+      right: 5%;
+    }
+
+    .ball:hover:not(:disabled) {
+      transform:
+        translateY(-2px)
+        scale(1.04);
+
+      border-color: var(--red);
+    }
+
+    .ball.selected {
+      color: white;
+
+      border-color: white;
+
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          #ff676e,
+          #f5222d 55%,
+          #8e0c13 100%
+        );
+
+      box-shadow:
+        0 0 0 3px
+        rgba(255, 255, 255, 0.14),
+        0 0 18px
+        rgba(245, 34, 45, 0.45);
+    }
+
+    .ball.selected::before,
+    .ball.selected::after {
+      border-color: white;
+    }
+
+    .ball.sold {
+      color: #858892;
+
+      border-color:
+        rgba(255, 255, 255, 0.08);
+
+      background: #292c35;
+
+      opacity: 0.58;
+
+      cursor: not-allowed;
+
+      box-shadow: none;
+    }
+
+    .ball.sold::before,
+    .ball.sold::after {
+      border-color: #777;
+    }
+
+    .checkout-panel {
+      max-width: 760px;
+
+      margin: 30px auto 0;
+
+      padding: 16px;
+
+      border:
+        1px solid
+        rgba(245, 34, 45, 0.5);
+
+      border-radius: 16px;
+
+      background:
+        rgba(6, 9, 20, 0.97);
+
+      box-shadow:
+        0 14px 35px
+        rgba(0, 0, 0, 0.4);
+    }
+
+    .selection-summary {
+      margin-bottom: 12px;
+
+      text-align: center;
+
+      color: var(--silver);
+
+      font-size: 15px;
+    }
+
+    .selection-total {
+      display: block;
+
+      margin-top: 5px;
+
+      color: white;
+
+      font-size: 24px;
+      font-weight: 1000;
+    }
+
+    .checkout-button {
+      width: 100%;
+
+      padding: 16px 18px;
+
+      border: none;
+
+      border-radius: 12px;
+
+      background:
+        linear-gradient(
+          90deg,
+          var(--navy-light),
+          var(--red),
+          #ff6b72
+        );
+
+      color: white;
+
+      font-size: 17px;
+      font-weight: 1000;
+
+      text-transform: uppercase;
+
+      cursor: pointer;
+    }
+
+    .checkout-button:disabled {
+      cursor: not-allowed;
+
+      opacity: 0.45;
+    }
+
+    .footer {
+      margin-top: 48px;
+
+      text-align: center;
+
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .footer strong {
+      color: white;
+    }
+
+    @media (max-width: 850px) {
+      .baseball-grid {
+        grid-template-columns:
+          repeat(
+            8,
+            minmax(0, 1fr)
+          );
+      }
+    }
+
+    @media (max-width: 650px) {
+      .page-shell {
+        width: 95%;
+
+        padding-top: 20px;
+      }
+
+      .team-logo {
+        width: min(350px, 84vw);
+      }
+
+      .baseball-grid {
+        grid-template-columns:
+          repeat(
+            5,
+            minmax(0, 1fr)
+          );
+
+        gap: 9px;
+      }
+
+      .progress-top {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page-shell">
+
+    <a
+      href="/"
+      class="back-to-team"
+    >
+      ← Back to Team
+    </a>
+
+
+    <section class="hero">
+
+      <img
+        src="/stars-logo.png"
+        alt="Planation Stars Blue"
+        class="team-logo"
+      />
+
+      <div class="team-kicker">
+        PLANATION STARS BLUE BASEBALL
+      </div>
+
+      <h1 class="hero-title">
+
+        <span class="road">
+          Road to
+        </span>
+
+        <span class="coop">
+          Cooperstown
+        </span>
+
+      </h1>
+
+    </section>
+
+
+    <section class="player-header">
+
+      <div class="supporting-label">
+        You're Supporting
+      </div>
+
+      <h2
+        id="playerTitle"
+        class="player-name"
+      >
+        Loading player...
+      </h2>
+
+    </section>
+
+
+    <p class="player-message">
+      Help fill all 100 baseballs for this player
+      and support Planation Stars Blue on the Road to Cooperstown.
+    </p>
+
+
+    <section class="progress-card">
+
+      <div class="progress-top">
+
+        <span id="raisedText">
+          $0 Raised
+        </span>
+
+        <span>
+          $5,050 Goal
+        </span>
+
+      </div>
+
+      <div class="progress-track">
+
+        <div
+          id="progressFill"
+          class="progress-fill"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <section class="instructions">
+
+      Choose
+      <strong>
+        one or more
+      </strong>
+      available baseballs below.
+
+      <br />
+
+      The numbers on the baseballs are added together
+      to determine your donation.
+
+      <br />
+
+      <div class="example">
+        Baseballs #7 + #19 + #47 = $73 donation
+      </div>
+
+    </section>
+
+
+    <div
+      id="statusBox"
+      class="status-box"
+    >
+      Loading fundraiser...
+    </div>
+
+
+    <section>
+
+      <div
+        id="baseballGrid"
+        class="baseball-grid"
+      ></div>
+
+    </section>
+
+
+    <section class="checkout-panel">
+
+      <div
+        id="selectionSummary"
+        class="selection-summary"
+      >
+        No baseballs selected
+
+        <span
+          id="selectionTotal"
+          class="selection-total"
+        >
+          $0
+        </span>
+
+      </div>
+
+      <button
+        id="checkoutButton"
+        class="checkout-button"
+        type="button"
+        disabled
+      >
+        Continue to Checkout
+      </button>
+
+    </section>
+
+
+    <footer class="footer">
+
+      <strong>
+        PLANATION STARS BLUE
+      </strong>
+
+      <br />
+
+      Road to Cooperstown
+
+    </footer>
+
+  </main>
+
+
+  <script>
+
+    const TEAM_KEY =
+      "planation-stars-blue";
+
+
+    const players = {
+
+      "christopher-freitas": {
+        number: 2,
+        name: "Christopher Freitas",
+      },
+
+      "asher-lima": {
+        number: 3,
+        name: "Asher Lima",
+      },
+
+      "matthew-ramos": {
+        number: 7,
+        name: "Matthew Ramos",
+      },
+
+      "jakob-medina": {
+        number: 8,
+        name: "Jakob Medina",
+      },
+
+      "mason-marrero": {
+        number: 10,
+        name: "Mason Marrero",
+      },
+
+      "tristan-fonteciella": {
+        number: 13,
+        name: "Tristan Fonteciella",
+      },
+
+      "owen-powell": {
+        number: 18,
+        name: "Owen Powell",
+      },
+
+      "bobby-grace": {
+        number: 24,
+        name: "Bobby Grace",
+      },
+
+      "cole-thompson": {
+        number: 27,
+        name: "Cole Thompson",
+      },
+
+      "clayton-meyerson": {
+        number: 44,
+        name: "Clayton Meyerson",
+      },
+
+      "jackson-keller": {
+        number: 99,
+        name: "Jackson Keller",
+      },
+
+    };
+
+
+    const playerTitle =
+      document.getElementById(
+        "playerTitle"
+      );
+
+    const baseballGrid =
+      document.getElementById(
+        "baseballGrid"
+      );
+
+    const statusBox =
+      document.getElementById(
+        "statusBox"
+      );
+
+    const raisedText =
+      document.getElementById(
+        "raisedText"
+      );
+
+    const progressFill =
+      document.getElementById(
+        "progressFill"
+      );
+
+    const selectionSummary =
+      document.getElementById(
+        "selectionSummary"
+      );
+
+    const selectionTotal =
+      document.getElementById(
+        "selectionTotal"
+      );
+
+    const checkoutButton =
+      document.getElementById(
+        "checkoutButton"
+      );
+
+
+    let selectedPlayerKey = null;
+
+    let selectedBaseballs =
+      new Set();
+
+    let currentBaseballs = [];
+
+
+    function getPlayerFromURL() {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      const player =
+        params.get("player");
+
+
+      if (
+        player &&
+        players[player]
+      ) {
+        return player;
+      }
+
+
+      return "christopher-freitas";
+    }
+
+
+    function setStatus(
+      message,
+      type = ""
+    ) {
+
+      statusBox.textContent =
+        message;
+
+      statusBox.className =
+        "status-box";
+
+
+      if (type) {
+        statusBox.classList.add(
+          type
+        );
+      }
+
+    }
+
+
+    function formatMoney(cents) {
+
+      return new Intl.NumberFormat(
+        "en-US",
+        {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }
+      ).format(
+        cents / 100
+      );
+
+    }
+
+
+    function calculateSelectedTotal() {
+
+      let total = 0;
+
+
+      for (
+        const number
+        of selectedBaseballs
+      ) {
+
+        const baseball =
+          currentBaseballs.find(
+            ball =>
+              Number(
+                ball.ball_number
+              ) === number
+          );
+
+
+        if (baseball) {
+
+          total +=
+            Number(
+              baseball.amount_cents ||
+              0
+            );
+
+        }
+
+      }
+
+
+      return total;
+    }
+
+
+    function updateSelectionSummary() {
+
+      const numbers =
+        Array.from(
+          selectedBaseballs
+        ).sort(
+          (a, b) =>
+            a - b
+        );
+
+
+      const total =
+        calculateSelectedTotal();
+
+
+      if (
+        numbers.length === 0
+      ) {
+
+        selectionSummary.childNodes[0]
+          .textContent =
+          "No baseballs selected ";
+
+
+        selectionTotal.textContent =
+          "$0";
+
+
+        checkoutButton.disabled =
+          true;
+
+
+        return;
+      }
+
+
+      selectionSummary.childNodes[0]
+        .textContent =
+        `${numbers.length} baseball${
+          numbers.length === 1
+            ? ""
+            : "s"
+        } selected `;
+
+
+      selectionTotal.textContent =
+        formatMoney(total);
+
+
+      checkoutButton.disabled =
+        false;
+
+    }
+
+
+    function renderBaseballs(
+      baseballs
+    ) {
+
+      baseballGrid.innerHTML =
+        "";
+
+
+      for (
+        const baseball
+        of baseballs
+      ) {
+
+        const number =
+          Number(
+            baseball.ball_number
+          );
+
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.type =
+          "button";
+
+
+        button.className =
+          "ball";
+
+
+        button.textContent =
+          number;
+
+
+        button.setAttribute(
+          "aria-label",
+          `Baseball ${number}`
+        );
+
+
+        if (
+          baseball.status ===
+          "sold"
+        ) {
+
+          button.classList.add(
+            "sold"
+          );
+
+
+          button.disabled =
+            true;
+
+
+          button.title =
+            `Baseball #${number} has been purchased`;
+
+        }
+
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            if (
+              selectedBaseballs.has(
+                number
+              )
+            ) {
+
+              selectedBaseballs.delete(
+                number
+              );
+
+
+              button.classList.remove(
+                "selected"
+              );
+
+
+            } else {
+
+
+              selectedBaseballs.add(
+                number
+              );
+
+
+              button.classList.add(
+                "selected"
+              );
+
+            }
+
+
+            updateSelectionSummary();
+
+          }
+        );
+
+
+        baseballGrid.appendChild(
+          button
+        );
+
+      }
+
+    }
+
+
+    async function loadFundraiser() {
+
+      selectedBaseballs.clear();
+
+
+      updateSelectionSummary();
+
+
+      baseballGrid.innerHTML =
+        "";
+
+
+      setStatus(
+        "Loading fundraiser..."
+      );
+
+
+      const fallback =
+        players[
+          selectedPlayerKey
+        ];
+
+
+      playerTitle.textContent =
+        `#${fallback.number} — ${fallback.name}`;
+
+
+      try {
+
+        const response =
+          await fetch(
+            `/api/fundraiser?player=${encodeURIComponent(
+              selectedPlayerKey
+            )}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+
+          throw new Error(
+            data.error ||
+            "Unable to load fundraiser."
+          );
+
+        }
+
+
+        selectedPlayerKey =
+          data.player.key;
+
+
+        playerTitle.textContent =
+          `#${data.player.number} — ${data.player.name}`;
+
+
+        currentBaseballs =
+          data.baseballs || [];
+
+
+        raisedText.textContent =
+          `${formatMoney(
+            data.totals.raisedCents
+          )} Raised`;
+
+
+        const goal =
+          Number(
+            data.totals.goalDollars ||
+            5050
+          );
+
+
+        const raised =
+          Number(
+            data.totals.raisedDollars ||
+            0
+          );
+
+
+        const percent =
+          Math.min(
+            100,
+            Math.max(
+              0,
+              (
+                raised /
+                goal
+              ) * 100
+            )
+          );
+
+
+        progressFill.style.width =
+          `${percent}%`;
+
+
+        renderBaseballs(
+          currentBaseballs
+        );
+
+
+        setStatus(
+          "Select one or more available baseballs."
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        setStatus(
+          error.message ||
+          "Unable to load fundraiser.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    checkoutButton.addEventListener(
+      "click",
+      async () => {
+
+        if (
+          selectedBaseballs.size ===
+          0
+        ) {
+          return;
+        }
+
+
+        checkoutButton.disabled =
+          true;
+
+
+        checkoutButton.textContent =
+          "Creating Checkout...";
+
+
+        setStatus(
+          "Preparing secure checkout..."
+        );
+
+
+        try {
+
+          const baseballs =
+            Array.from(
+              selectedBaseballs
+            ).sort(
+              (a, b) =>
+                a - b
+            );
+
+
+          const response =
+            await fetch(
+              "/api/create-checkout",
+              {
+                method: "POST",
+
+                headers: {
+                  "content-type":
+                    "application/json",
+                },
+
+                body:
+                  JSON.stringify({
+
+                    playerKey:
+                      selectedPlayerKey,
+
+                    baseballs,
+
+                  }),
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (
+            !response.ok
+          ) {
+
+            throw new Error(
+              data.error ||
+              "Unable to create checkout."
+            );
+
+          }
+
+
+          if (
+            !data.url
+          ) {
+
+            throw new Error(
+              "Checkout URL was not returned."
+            );
+
+          }
+
+
+          window.location.href =
+            data.url;
+
+
+        } catch (error) {
+
+          console.error(
+            error
+          );
+
+
+          setStatus(
+            error.message ||
+            "Checkout is not available yet.",
+            "error"
+          );
+
+
+          checkoutButton.disabled =
+            false;
+
+
+          checkoutButton.textContent =
+            "Continue to Checkout";
+
+        }
+
+      }
+    );
+
+
+    async function initialize() {
+
+      selectedPlayerKey =
+        getPlayerFromURL();
+
+
+      await loadFundraiser();
+
+    }
+
+
+    initialize();
+
+  </script>
+
+</body>
+</html>
