@@ -136,6 +136,14 @@ export async function onRequestPost(context) {
     const baseballNumbersRaw =
       metadata.baseball_numbers;
 
+    const donorName =
+      String(
+        metadata.donor_name || ""
+      )
+        .trim()
+        .replace(/\s+/g, " ")
+        .slice(0, 50);
+
 
     if (
       !teamId ||
@@ -339,7 +347,10 @@ export async function onRequestPost(context) {
                 session.id,
 
               reserved_until:
-                null
+                null,
+
+              donor_name:
+                donorName || null
             })
         }
       );
