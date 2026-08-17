@@ -80,11 +80,6 @@ export async function onRequestPost(context) {
       JSON.parse(rawBody);
 
 
-    /* =========================
-       ONLY HANDLE SUCCESSFUL
-       CHECKOUT SESSIONS
-    ========================= */
-
     if (
       event.type !==
       "checkout.session.completed"
@@ -118,10 +113,6 @@ export async function onRequestPost(context) {
     const metadata =
       session.metadata || {};
 
-
-    /* =========================
-       VERIFY TEAM
-    ========================= */
 
     if (
       metadata.team_key !==
@@ -199,10 +190,7 @@ export async function onRequestPost(context) {
     };
 
 
-    /* =========================
-       VERIFY PLAYER BELONGS
-       TO PLANTATION STARS
-    ========================= */
+    /* VERIFY PLAYER BELONGS TO TEAM */
 
     const playerResponse =
       await fetch(
@@ -219,11 +207,6 @@ export async function onRequestPost(context) {
 
 
     if (!playerResponse.ok) {
-      console.error(
-        "Player verification error:",
-        await playerResponse.text()
-      );
-
       return new Response(
         "Player verification failed.",
         {
@@ -247,10 +230,7 @@ export async function onRequestPost(context) {
     }
 
 
-    /* =========================
-       VERIFY BASEBALLS ARE
-       STILL AVAILABLE
-    ========================= */
+    /* CHECK THIS PLAYER'S BASEBALLS */
 
     const ballFilter =
       baseballNumbers.join(",");
@@ -258,9 +238,9 @@ export async function onRequestPost(context) {
 
     const checkResponse =
       await fetch(
-        `${SUPABASE_URL}/rest/v1/shared_baseballs?team_id=eq.${encodeURIComponent(
-          teamId
-        )}&ball_number=in.(${ballFilter})&select=id,ball_number,status`,
+        `${SUPABASE_URL}/rest/v1/baseballs?player_id=eq.${encodeURIComponent(
+          playerId
+        )}&ball_number=in.(${ballFilter})&select=id,ball_number,status,stripe_session_id`,
         {
           headers:
             supabaseHeaders
@@ -269,11 +249,6 @@ export async function onRequestPost(context) {
 
 
     if (!checkResponse.ok) {
-      console.error(
-        "Baseball verification error:",
-        await checkResponse.text()
-      );
-
       return new Response(
         "Baseball verification failed.",
         {
@@ -303,58 +278,30 @@ export async function onRequestPost(context) {
     const unavailable =
       selectedBaseballs.filter(
         ball =>
-          ball.status !==
-          "available"
+          ball.status === "sold"
       );
 
-
-    /*
-      Stripe may retry the same webhook.
-
-      If every ball is already sold using
-      this exact Stripe session, we want
-      to safely return success instead of
-      creating an error.
-
-      We check that below.
-    */
 
     if (
       unavailable.length > 0
     ) {
 
-      const sessionCheckResponse =
-        await fetch(
-          `${SUPABASE_URL}/rest/v1/shared_baseballs?team_id=eq.${encodeURIComponent(
-            teamId
-          )}&ball_number=in.(${ballFilter})&stripe_session_id=eq.${encodeURIComponent(
+      const alreadyProcessed =
+        selectedBaseballs.every(
+          ball =>
+            ball.status === "sold" &&
+            ball.stripe_session_id ===
             session.id
-          )}&select=id`,
-          {
-            headers:
-              supabaseHeaders
-          }
         );
 
 
-      if (sessionCheckResponse.ok) {
-
-        const alreadyProcessed =
-          await sessionCheckResponse.json();
-
-
-        if (
-          alreadyProcessed.length ===
-          baseballNumbers.length
-        ) {
-          return new Response(
-            "Already processed.",
-            {
-              status: 200
-            }
-          );
-        }
-
+      if (alreadyProcessed) {
+        return new Response(
+          "Already processed.",
+          {
+            status: 200
+          }
+        );
       }
 
 
@@ -367,15 +314,13 @@ export async function onRequestPost(context) {
     }
 
 
-    /* =========================
-       MARK SHARED BASEBALLS SOLD
-    ========================= */
+    /* MARK ONLY THIS PLAYER'S BALLS SOLD */
 
     const updateResponse =
       await fetch(
-        `${SUPABASE_URL}/rest/v1/shared_baseballs?team_id=eq.${encodeURIComponent(
-          teamId
-        )}&ball_number=in.(${ballFilter})&status=eq.available`,
+        `${SUPABASE_URL}/rest/v1/baseballs?player_id=eq.${encodeURIComponent(
+          playerId
+        )}&ball_number=in.(${ballFilter})&status=neq.sold`,
         {
           method: "PATCH",
 
@@ -387,14 +332,14 @@ export async function onRequestPost(context) {
               status:
                 "sold",
 
-              supported_player_id:
-                playerId,
-
               sold_at:
                 new Date().toISOString(),
 
               stripe_session_id:
-                session.id
+                session.id,
+
+              reserved_until:
+                null
             })
         }
       );
@@ -402,7 +347,7 @@ export async function onRequestPost(context) {
 
     if (!updateResponse.ok) {
       console.error(
-        "Shared baseball update error:",
+        "Baseball update error:",
         await updateResponse.text()
       );
 
@@ -423,10 +368,12 @@ export async function onRequestPost(context) {
     );
 
   } catch (error) {
+
     console.error(
       "Stripe webhook error:",
       error
     );
+
 
     return new Response(
       "Webhook error.",
@@ -434,13 +381,10 @@ export async function onRequestPost(context) {
         status: 500
       }
     );
+
   }
 }
 
-
-/* =========================
-   STRIPE SIGNATURE VERIFY
-========================= */
 
 async function verifyStripeSignature(
   payload,
@@ -463,7 +407,10 @@ async function verifyStripeSignature(
     const signatures = [];
 
 
-    for (const part of parts) {
+    for (
+      const part
+      of parts
+    ) {
 
       const separatorIndex =
         part.indexOf("=");
@@ -527,7 +474,9 @@ async function verifyStripeSignature(
 
 
     if (
-      !Number.isFinite(webhookTime)
+      !Number.isFinite(
+        webhookTime
+      )
     ) {
       return false;
     }
@@ -554,7 +503,9 @@ async function verifyStripeSignature(
     const cryptoKey =
       await crypto.subtle.importKey(
         "raw",
-        encoder.encode(secret),
+        encoder.encode(
+          secret
+        ),
         {
           name:
             "HMAC",
@@ -614,10 +565,6 @@ async function verifyStripeSignature(
   }
 }
 
-
-/* =========================
-   TIMING SAFE STRING CHECK
-========================= */
 
 function timingSafeEqual(
   valueA,
