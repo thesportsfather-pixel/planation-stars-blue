@@ -2,13 +2,18 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    const SUPABASE_URL = env.SUPABASE_URL;
+    const SUPABASE_URL =
+      env.SUPABASE_URL;
+
     const SUPABASE_SERVICE_ROLE_KEY =
       env.SUPABASE_SERVICE_ROLE_KEY;
+
     const STRIPE_SECRET_KEY =
       env.STRIPE_SECRET_KEY;
+
     const TEAM_KEY =
       env.TEAM_KEY || "plantation-stars-blue";
+
 
     if (
       !SUPABASE_URL ||
@@ -23,6 +28,7 @@ export async function onRequestPost(context) {
       );
     }
 
+
     if (!STRIPE_SECRET_KEY) {
       return jsonResponse(
         {
@@ -33,18 +39,29 @@ export async function onRequestPost(context) {
       );
     }
 
+
     const body =
       await request.json();
 
+
+    /*
+      Accept both payload styles so the
+      page remains compatible during the
+      rollback.
+    */
+
     const playerKey =
+      body.playerKey ||
       body.player;
 
-    const baseballNumbers =
-      Array.isArray(
-        body.baseball_numbers
-      )
-        ? body.baseball_numbers
-        : [];
+
+    const requestedBaseballs =
+      Array.isArray(body.baseballs)
+        ? body.baseballs
+        : Array.isArray(body.baseball_numbers)
+          ? body.baseball_numbers
+          : [];
+
 
     if (!playerKey) {
       return jsonResponse(
@@ -56,8 +73,9 @@ export async function onRequestPost(context) {
       );
     }
 
+
     if (
-      baseballNumbers.length === 0
+      requestedBaseballs.length === 0
     ) {
       return jsonResponse(
         {
@@ -68,16 +86,18 @@ export async function onRequestPost(context) {
       );
     }
 
-    const uniqueNumbers = [
+
+    const baseballNumbers = [
       ...new Set(
-        baseballNumbers.map(Number)
+        requestedBaseballs.map(Number)
       )
     ].sort(
       (a, b) => a - b
     );
 
+
     if (
-      uniqueNumbers.some(
+      baseballNumbers.some(
         number =>
           !Number.isInteger(number) ||
           number < 1 ||
@@ -93,11 +113,14 @@ export async function onRequestPost(context) {
       );
     }
 
-    const headers = {
+
+    const supabaseHeaders = {
       apikey:
         SUPABASE_SERVICE_ROLE_KEY,
+
       Authorization:
         `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+
       "Content-Type":
         "application/json"
     };
@@ -113,9 +136,11 @@ export async function onRequestPost(context) {
           TEAM_KEY
         )}&select=id,team_name,team_key&limit=1`,
         {
-          headers
+          headers:
+            supabaseHeaders
         }
       );
+
 
     if (!teamResponse.ok) {
       return jsonResponse(
@@ -127,8 +152,10 @@ export async function onRequestPost(context) {
       );
     }
 
+
     const teams =
       await teamResponse.json();
+
 
     if (!teams.length) {
       return jsonResponse(
@@ -139,6 +166,7 @@ export async function onRequestPost(context) {
         404
       );
     }
+
 
     const team =
       teams[0];
@@ -154,9 +182,11 @@ export async function onRequestPost(context) {
           playerKey
         )}&select=id,player_key,player_name,player_number&limit=1`,
         {
-          headers
+          headers:
+            supabaseHeaders
         }
       );
+
 
     if (!playerResponse.ok) {
       return jsonResponse(
@@ -168,8 +198,10 @@ export async function onRequestPost(context) {
       );
     }
 
+
     const players =
       await playerResponse.json();
+
 
     if (!players.length) {
       return jsonResponse(
@@ -181,24 +213,29 @@ export async function onRequestPost(context) {
       );
     }
 
+
     const player =
       players[0];
 
 
     /* =========================
-       LOAD SHARED BASEBALLS
+       LOAD THIS PLAYER'S
+       SELECTED BASEBALLS
     ========================= */
 
-    const filter =
-      uniqueNumbers.join(",");
+    const ballFilter =
+      baseballNumbers.join(",");
+
 
     const baseballResponse =
       await fetch(
-        `${SUPABASE_URL}/rest/v1/shared_baseballs?team_id=eq.${team.id}&ball_number=in.(${filter})&select=id,ball_number,amount_cents,status`,
+        `${SUPABASE_URL}/rest/v1/baseballs?player_id=eq.${player.id}&ball_number=in.(${ballFilter})&select=id,ball_number,amount_cents,status,reserved_until`,
         {
-          headers
+          headers:
+            supabaseHeaders
         }
       );
+
 
     if (!baseballResponse.ok) {
       return jsonResponse(
@@ -210,12 +247,14 @@ export async function onRequestPost(context) {
       );
     }
 
+
     const baseballs =
       await baseballResponse.json();
 
+
     if (
       baseballs.length !==
-      uniqueNumbers.length
+      baseballNumbers.length
     ) {
       return jsonResponse(
         {
@@ -226,12 +265,53 @@ export async function onRequestPost(context) {
       );
     }
 
+
+    /* =========================
+       CHECK AVAILABILITY
+    ========================= */
+
     const unavailable =
       baseballs.filter(
-        ball =>
-          ball.status !==
-          "available"
+        ball => {
+
+          if (
+            ball.status ===
+            "sold"
+          ) {
+            return true;
+          }
+
+
+          if (
+            ball.status ===
+            "reserved" &&
+            ball.reserved_until
+          ) {
+
+            const reservedUntil =
+              new Date(
+                ball.reserved_until
+              ).getTime();
+
+
+            if (
+              Number.isFinite(
+                reservedUntil
+              ) &&
+              reservedUntil >
+              Date.now()
+            ) {
+              return true;
+            }
+
+          }
+
+
+          return false;
+
+        }
       );
+
 
     if (
       unavailable.length > 0
@@ -247,7 +327,7 @@ export async function onRequestPost(context) {
 
 
     /* =========================
-       TOTAL
+       CALCULATE TOTAL
     ========================= */
 
     const totalCents =
@@ -259,6 +339,7 @@ export async function onRequestPost(context) {
           ),
         0
       );
+
 
     if (
       totalCents <= 0
@@ -274,7 +355,7 @@ export async function onRequestPost(context) {
 
 
     /* =========================
-       STRIPE CHECKOUT
+       CREATE STRIPE SESSION
     ========================= */
 
     const origin =
@@ -282,37 +363,44 @@ export async function onRequestPost(context) {
         request.url
       ).origin;
 
+
     const form =
       new URLSearchParams();
+
 
     form.append(
       "mode",
       "payment"
     );
 
+
     form.append(
       "payment_method_types[0]",
       "card"
     );
+
 
     form.append(
       "line_items[0][price_data][currency]",
       "usd"
     );
 
+
     form.append(
       "line_items[0][price_data][unit_amount]",
       String(totalCents)
     );
 
+
     form.append(
       "line_items[0][price_data][product_data][name]",
-      `Plantation Stars Blue Fundraiser — ${player.player_name}`
+      `Plantation Stars Blue — ${player.player_name}`
     );
+
 
     form.append(
       "line_items[0][price_data][product_data][description]",
-      `Baseballs: ${uniqueNumbers
+      `Baseballs: ${baseballNumbers
         .map(
           number =>
             `#${number}`
@@ -320,10 +408,12 @@ export async function onRequestPost(context) {
         .join(", ")}`
     );
 
+
     form.append(
       "line_items[0][quantity]",
       "1"
     );
+
 
     form.append(
       "success_url",
@@ -331,6 +421,7 @@ export async function onRequestPost(context) {
         player.player_key
       )}&success=1`
     );
+
 
     form.append(
       "cancel_url",
@@ -349,29 +440,34 @@ export async function onRequestPost(context) {
       TEAM_KEY
     );
 
+
     form.append(
       "metadata[team_id]",
       team.id
     );
+
 
     form.append(
       "metadata[player_id]",
       player.id
     );
 
+
     form.append(
       "metadata[player_key]",
       player.player_key
     );
+
 
     form.append(
       "metadata[player_name]",
       player.player_name
     );
 
+
     form.append(
       "metadata[baseball_numbers]",
-      uniqueNumbers.join(",")
+      baseballNumbers.join(",")
     );
 
 
@@ -379,8 +475,7 @@ export async function onRequestPost(context) {
       await fetch(
         "https://api.stripe.com/v1/checkout/sessions",
         {
-          method:
-            "POST",
+          method: "POST",
 
           headers: {
             Authorization:
@@ -395,21 +490,28 @@ export async function onRequestPost(context) {
         }
       );
 
+
     const stripeData =
       await stripeResponse.json();
 
-    if (
-      !stripeResponse.ok
-    ) {
+
+    if (!stripeResponse.ok) {
+      console.error(
+        "Stripe error:",
+        stripeData
+      );
+
+
       return jsonResponse(
         {
           error:
             stripeData?.error?.message ||
-            "Unable to create Stripe checkout."
+            "Unable to create checkout."
         },
         500
       );
     }
+
 
     return jsonResponse(
       {
@@ -419,11 +521,14 @@ export async function onRequestPost(context) {
       200
     );
 
+
   } catch (error) {
+
     console.error(
       "Create checkout error:",
       error
     );
+
 
     return jsonResponse(
       {
@@ -432,6 +537,7 @@ export async function onRequestPost(context) {
       },
       500
     );
+
   }
 }
 
@@ -440,6 +546,7 @@ function jsonResponse(
   data,
   status = 200
 ) {
+
   return new Response(
     JSON.stringify(data),
     {
@@ -454,4 +561,5 @@ function jsonResponse(
       }
     }
   );
+
 }
