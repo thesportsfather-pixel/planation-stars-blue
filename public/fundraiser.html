@@ -22,8 +22,6 @@
       --white: #ffffff;
       --silver: #d9dde8;
       --muted: #a8afbf;
-      --success: #35e59b;
-      --danger: #ff5964;
     }
 
     * {
@@ -125,7 +123,6 @@
       max-width: 760px;
       margin-left: auto;
       margin-right: auto;
-
       border: 2px solid rgba(245, 34, 45, 0.45);
       border-radius: 18px;
 
@@ -273,7 +270,6 @@
 
       color: #111;
       cursor: pointer;
-
       overflow: hidden;
       padding: 7px;
 
@@ -292,21 +288,15 @@
     .donor-name {
       position: relative;
       z-index: 3;
-
       display: block;
       width: 90%;
-
       margin-top: 3px;
-
       font-size: clamp(7px, 0.8vw, 10px);
       line-height: 1.05;
       font-weight: 900;
-
       text-align: center;
-
       overflow: hidden;
       text-overflow: ellipsis;
-
       color: white;
     }
 
@@ -354,13 +344,12 @@
     }
 
     .donor-field {
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .donor-field label {
       display: block;
       margin-bottom: 8px;
-
       color: white;
       font-size: 13px;
       font-weight: 900;
@@ -368,21 +357,47 @@
       text-transform: uppercase;
     }
 
-    .donor-field input {
+    .donor-field input[type="text"] {
       width: 100%;
       padding: 14px 15px;
-
       border: 2px solid rgba(255, 255, 255, 0.17);
       border-radius: 12px;
-
       background: #0b1022;
       color: white;
-
       outline: none;
     }
 
-    .donor-field input:focus {
+    .donor-field input[type="text"]:focus {
       border-color: var(--red);
+    }
+
+    .donor-field input[type="text"]:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .anonymous-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 18px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+    }
+
+    .anonymous-option input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--red);
+      cursor: pointer;
+    }
+
+    .anonymous-option span {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--silver);
     }
 
     .donor-help {
@@ -410,7 +425,6 @@
     .checkout-button {
       width: 100%;
       padding: 16px 18px;
-
       border: none;
       border-radius: 12px;
 
@@ -474,7 +488,6 @@
       ← Back to Team
     </a>
 
-
     <section class="hero">
 
       <img
@@ -494,7 +507,6 @@
 
     </section>
 
-
     <section class="player-header">
 
       <div class="supporting-label">
@@ -510,12 +522,10 @@
 
     </section>
 
-
     <p class="player-message">
       Help fill all 100 baseballs for this player
       and support Plantation Stars Blue on the Road to Cooperstown.
     </p>
-
 
     <section class="progress-card">
 
@@ -540,7 +550,6 @@
 
     </section>
 
-
     <section class="instructions">
 
       Choose
@@ -560,7 +569,6 @@
 
     </section>
 
-
     <div
       id="statusBox"
       class="status-box"
@@ -568,12 +576,10 @@
       Loading fundraiser...
     </div>
 
-
     <div
       id="baseballGrid"
       class="baseball-grid"
     ></div>
-
 
     <section class="checkout-panel">
 
@@ -598,6 +604,18 @@
 
       </div>
 
+      <label class="anonymous-option">
+
+        <input
+          id="anonymousCheckbox"
+          type="checkbox"
+        />
+
+        <span>
+          Remain Anonymous
+        </span>
+
+      </label>
 
       <div
         id="selectionSummary"
@@ -614,7 +632,6 @@
 
       </div>
 
-
       <button
         id="checkoutButton"
         class="checkout-button"
@@ -626,7 +643,6 @@
 
     </section>
 
-
     <footer class="footer">
       <strong>Plantation Stars Blue</strong>
       <br />
@@ -634,7 +650,6 @@
     </footer>
 
   </main>
-
 
   <script>
 
@@ -743,6 +758,11 @@
         "donorName"
       );
 
+    const anonymousCheckbox =
+      document.getElementById(
+        "anonymousCheckbox"
+      );
+
 
     let selectedPlayerKey = null;
 
@@ -750,6 +770,31 @@
       new Set();
 
     let currentBaseballs = [];
+
+
+    anonymousCheckbox.addEventListener(
+      "change",
+      () => {
+
+        if (
+          anonymousCheckbox.checked
+        ) {
+
+          donorNameInput.value = "";
+          donorNameInput.disabled = true;
+          donorNameInput.placeholder =
+            "Anonymous donation";
+
+        } else {
+
+          donorNameInput.disabled = false;
+          donorNameInput.placeholder =
+            "Example: Grandma & Grandpa";
+
+        }
+
+      }
+    );
 
 
     function getPlayerFromURL() {
@@ -930,7 +975,6 @@
         button.type =
           "button";
 
-
         button.className =
           "ball";
 
@@ -944,10 +988,8 @@
         numberSpan.className =
           "ball-number";
 
-
         numberSpan.textContent =
           number;
-
 
         button.appendChild(
           numberSpan
@@ -963,64 +1005,40 @@
             "sold"
           );
 
-
           button.disabled =
             true;
 
 
-          if (
-            baseball.donor_name
-          ) {
-
-            const donorSpan =
-              document.createElement(
-                "span"
-              );
-
-
-            donorSpan.className =
-              "donor-name";
-
-
-            donorSpan.textContent =
-              baseball.donor_name;
-
-
-            donorSpan.title =
-              baseball.donor_name;
-
-
-            button.appendChild(
-              donorSpan
+          const donorSpan =
+            document.createElement(
+              "span"
             );
 
-          } else {
 
-            const soldSpan =
-              document.createElement(
-                "span"
-              );
+          donorSpan.className =
+            "donor-name";
 
 
-            soldSpan.className =
-              "donor-name";
+          donorSpan.textContent =
+            baseball.donor_name ||
+            "Anonymous";
 
 
-            soldSpan.textContent =
-              "SOLD";
+          donorSpan.title =
+            baseball.donor_name ||
+            "Anonymous";
 
 
-            button.appendChild(
-              soldSpan
-            );
-
-          }
+          button.appendChild(
+            donorSpan
+          );
 
 
           button.title =
-            baseball.donor_name
-              ? `Purchased by ${baseball.donor_name}`
-              : `Baseball #${number} has been purchased`;
+            `Purchased by ${
+              baseball.donor_name ||
+              "Anonymous"
+            }`;
 
         } else {
 
@@ -1038,7 +1056,6 @@
                   number
                 );
 
-
                 button.classList.remove(
                   "selected"
                 );
@@ -1049,13 +1066,11 @@
                   number
                 );
 
-
                 button.classList.add(
                   "selected"
                 );
 
               }
-
 
               updateSelectionSummary();
 
@@ -1063,7 +1078,6 @@
           );
 
         }
-
 
         baseballGrid.appendChild(
           button
@@ -1217,23 +1231,37 @@
         }
 
 
-        const donorName =
-          donorNameInput.value
-            .trim()
-            .replace(/\s+/g, " ");
+        let donorName;
 
 
-        if (!donorName) {
+        if (
+          anonymousCheckbox.checked
+        ) {
 
-          setStatus(
-            "Please enter the donor name before checkout.",
-            "error"
-          );
+          donorName =
+            "Anonymous";
+
+        } else {
+
+          donorName =
+            donorNameInput.value
+              .trim()
+              .replace(/\s+/g, " ");
 
 
-          donorNameInput.focus();
+          if (!donorName) {
 
-          return;
+            setStatus(
+              "Please enter a donor name or select Remain Anonymous.",
+              "error"
+            );
+
+            donorNameInput.focus();
+
+            return;
+
+          }
+
         }
 
 
@@ -1289,9 +1317,7 @@
             await response.json();
 
 
-          if (
-            !response.ok
-          ) {
+          if (!response.ok) {
 
             throw new Error(
               data.error ||
@@ -1301,9 +1327,7 @@
           }
 
 
-          if (
-            !data.url
-          ) {
+          if (!data.url) {
 
             throw new Error(
               "Checkout URL was not returned."
