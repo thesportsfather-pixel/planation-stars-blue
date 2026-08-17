@@ -82,11 +82,16 @@
     .back-to-team {
       display: inline-block;
       margin-bottom: 22px;
+
       color: #ff6a72;
+
       text-decoration: none;
+
       font-size: 14px;
       font-weight: 900;
+
       letter-spacing: 0.06em;
+
       text-transform: uppercase;
     }
 
@@ -101,9 +106,12 @@
 
     .team-logo {
       display: block;
+
       width: min(440px, 86vw);
       height: auto;
+
       margin: 0 auto 22px;
+
       object-fit: contain;
 
       filter:
@@ -115,10 +123,14 @@
 
     .team-kicker {
       margin-bottom: 12px;
+
       color: var(--red);
+
       font-size: 13px;
       font-weight: 900;
+
       letter-spacing: 0.24em;
+
       text-transform: uppercase;
     }
 
@@ -133,9 +145,12 @@
         );
 
       line-height: 0.86;
+
       font-weight: 1000;
       font-style: italic;
+
       letter-spacing: -0.045em;
+
       text-transform: uppercase;
 
       text-shadow:
@@ -156,8 +171,11 @@
 
     .player-header {
       max-width: 760px;
+
       margin: 34px auto 0;
+
       padding: 20px;
+
       text-align: center;
 
       border:
@@ -176,10 +194,14 @@
 
     .supporting-label {
       margin-bottom: 7px;
+
       color: #ff6a72;
+
       font-size: 12px;
       font-weight: 900;
+
       letter-spacing: 0.16em;
+
       text-transform: uppercase;
     }
 
@@ -194,20 +216,27 @@
         );
 
       font-weight: 1000;
+
       text-transform: uppercase;
     }
 
     .player-message {
       max-width: 700px;
+
       margin: 16px auto 0;
+
       text-align: center;
+
       color: var(--silver);
+
       line-height: 1.55;
     }
 
     .progress-card {
       max-width: 760px;
+
       margin: 28px auto;
+
       padding: 20px 22px;
 
       border:
@@ -226,8 +255,11 @@
 
     .progress-top {
       display: flex;
+
       justify-content: space-between;
+
       gap: 18px;
+
       font-size: 17px;
       font-weight: 900;
     }
@@ -235,15 +267,20 @@
     .progress-track {
       width: 100%;
       height: 18px;
+
       margin-top: 16px;
+
       overflow: hidden;
+
       border-radius: 999px;
+
       background: #252d46;
     }
 
     .progress-fill {
       width: 0%;
       height: 100%;
+
       border-radius: inherit;
 
       background:
@@ -254,15 +291,18 @@
           #ff7178
         );
 
-      transition:
-        width 0.35s ease;
+      transition: width 0.35s ease;
     }
 
     .instructions {
       max-width: 760px;
+
       margin: 30px auto 18px;
+
       text-align: center;
+
       color: var(--silver);
+
       line-height: 1.6;
     }
 
@@ -272,22 +312,36 @@
 
     .example {
       display: inline-block;
+
       margin-top: 12px;
+
       padding: 10px 14px;
+
       border-radius: 10px;
+
       background: var(--panel2);
+
       color: white;
+
       font-weight: 800;
     }
 
     .status-box {
       max-width: 760px;
+
       margin: 18px auto;
+
       padding: 14px 16px;
+
       border-radius: 12px;
+
       text-align: center;
-      background: rgba(255, 255, 255, 0.05);
+
+      background:
+        rgba(255, 255, 255, 0.05);
+
       color: #ff7a81;
+
       font-weight: 800;
     }
 
@@ -323,7 +377,9 @@
         );
 
       gap: 11px;
+
       max-width: 1040px;
+
       margin: 0 auto;
     }
 
@@ -331,6 +387,7 @@
       position: relative;
 
       display: flex;
+
       align-items: center;
       justify-content: center;
 
@@ -361,6 +418,7 @@
         );
 
       font-weight: 1000;
+
       cursor: pointer;
 
       box-shadow:
@@ -379,7 +437,9 @@
     .ball::before,
     .ball::after {
       content: "";
+
       position: absolute;
+
       width: 48%;
       height: 68%;
 
@@ -390,7 +450,9 @@
 
       border-top: none;
       border-bottom: none;
+
       border-radius: 50%;
+
       opacity: 0.5;
     }
 
@@ -412,6 +474,7 @@
 
     .ball.selected {
       color: white;
+
       border-color: white;
 
       background:
@@ -441,8 +504,11 @@
         rgba(255, 255, 255, 0.08);
 
       background: #292c35;
+
       opacity: 0.58;
+
       cursor: not-allowed;
+
       box-shadow: none;
     }
 
@@ -453,7 +519,9 @@
 
     .checkout-panel {
       max-width: 760px;
+
       margin: 30px auto 0;
+
       padding: 16px;
 
       border:
@@ -472,23 +540,32 @@
 
     .selection-summary {
       margin-bottom: 12px;
+
       text-align: center;
+
       color: var(--silver);
+
       font-size: 15px;
     }
 
     .selection-total {
       display: block;
+
       margin-top: 5px;
+
       color: white;
+
       font-size: 24px;
       font-weight: 1000;
     }
 
     .checkout-button {
       width: 100%;
+
       padding: 16px 18px;
+
       border: none;
+
       border-radius: 12px;
 
       background:
@@ -500,21 +577,28 @@
         );
 
       color: white;
+
       font-size: 17px;
       font-weight: 1000;
+
       text-transform: uppercase;
+
       cursor: pointer;
     }
 
     .checkout-button:disabled {
       cursor: not-allowed;
+
       opacity: 0.45;
     }
 
     .footer {
       margin-top: 48px;
+
       text-align: center;
+
       color: var(--muted);
+
       font-size: 13px;
       line-height: 1.7;
     }
@@ -581,7 +665,7 @@
       />
 
       <div class="team-kicker">
-        Plantation Stars Blue BASEBALL
+        Plantation Stars Blue Baseball
       </div>
 
       <h1 class="hero-title">
@@ -616,8 +700,8 @@
 
 
     <p class="player-message">
-      Choose from the shared Plantation Stars Blue
-      100-baseball fundraiser board.
+      Help fill all 100 baseballs for this player
+      and support Plantation Stars Blue on the Road to Cooperstown.
     </p>
 
 
@@ -875,15 +959,19 @@
         "status-box";
 
       if (type) {
+
         statusBox.classList.add(
           type
         );
+
       }
 
     }
 
 
-    function formatMoney(cents) {
+    function formatMoney(
+      cents
+    ) {
 
       return new Intl.NumberFormat(
         "en-US",
@@ -903,6 +991,7 @@
 
       let total = 0;
 
+
       for (
         const number
         of selectedBaseballs
@@ -916,6 +1005,7 @@
               ) === number
           );
 
+
         if (baseball) {
 
           total +=
@@ -927,6 +1017,7 @@
         }
 
       }
+
 
       return total;
     }
@@ -942,8 +1033,10 @@
             a - b
         );
 
+
       const total =
         calculateSelectedTotal();
+
 
       if (
         numbers.length === 0
@@ -953,14 +1046,22 @@
           .textContent =
           "No baseballs selected ";
 
+
         selectionTotal.textContent =
           "$0";
+
 
         checkoutButton.disabled =
           true;
 
+
+        checkoutButton.textContent =
+          "Continue to Checkout";
+
+
         return;
       }
+
 
       selectionSummary.childNodes[0]
         .textContent =
@@ -970,11 +1071,19 @@
             : "s"
         } selected `;
 
+
       selectionTotal.textContent =
-        formatMoney(total);
+        formatMoney(
+          total
+        );
+
 
       checkoutButton.disabled =
         false;
+
+
+      checkoutButton.textContent =
+        `Checkout ${formatMoney(total)}`;
 
     }
 
@@ -986,6 +1095,7 @@
       baseballGrid.innerHTML =
         "";
 
+
       for (
         const baseball
         of baseballs
@@ -996,24 +1106,30 @@
             baseball.ball_number
           );
 
+
         const button =
           document.createElement(
             "button"
           );
 
+
         button.type =
           "button";
+
 
         button.className =
           "ball";
 
+
         button.textContent =
           number;
+
 
         button.setAttribute(
           "aria-label",
           `Baseball ${number}`
         );
+
 
         if (
           baseball.status ===
@@ -1024,8 +1140,10 @@
             "sold"
           );
 
+
           button.disabled =
             true;
+
 
           button.title =
             `Baseball #${number} has been purchased`;
@@ -1046,6 +1164,7 @@
                   number
                 );
 
+
                 button.classList.remove(
                   "selected"
                 );
@@ -1056,11 +1175,13 @@
                   number
                 );
 
+
                 button.classList.add(
                   "selected"
                 );
 
               }
+
 
               updateSelectionSummary();
 
@@ -1068,6 +1189,7 @@
           );
 
         }
+
 
         baseballGrid.appendChild(
           button
@@ -1082,22 +1204,28 @@
 
       selectedBaseballs.clear();
 
+
       updateSelectionSummary();
+
 
       baseballGrid.innerHTML =
         "";
 
+
       setStatus(
         "Loading fundraiser..."
       );
+
 
       const fallback =
         players[
           selectedPlayerKey
         ];
 
+
       playerTitle.textContent =
         `#${fallback.number} — ${fallback.name}`;
+
 
       try {
 
@@ -1111,10 +1239,15 @@
             }
           );
 
+
         const data =
           await response.json();
 
-        if (!response.ok) {
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
 
           throw new Error(
             data.error ||
@@ -1123,31 +1256,38 @@
 
         }
 
+
         selectedPlayerKey =
-          data.player.player_key;
+          data.player.key;
+
 
         playerTitle.textContent =
-          `#${data.player.player_number} — ${data.player.player_name}`;
+          `#${data.player.number} — ${data.player.name}`;
+
 
         currentBaseballs =
           data.baseballs || [];
 
+
         const raisedCents =
           Number(
-            data.totals.raised_cents ||
+            data.totals.raisedCents ||
             0
           );
 
+
         const goalCents =
           Number(
-            data.totals.goal_cents ||
+            data.totals.goalCents ||
             505000
           );
+
 
         raisedText.textContent =
           `${formatMoney(
             raisedCents
           )} Raised`;
+
 
         const percent =
           Math.min(
@@ -1161,22 +1301,27 @@
             )
           );
 
+
         progressFill.style.width =
           `${percent}%`;
+
 
         renderBaseballs(
           currentBaseballs
         );
 
+
         setStatus(
           "Select one or more available baseballs."
         );
+
 
       } catch (error) {
 
         console.error(
           error
         );
+
 
         setStatus(
           error.message ||
@@ -1200,25 +1345,30 @@
           return;
         }
 
+
         checkoutButton.disabled =
           true;
 
+
         checkoutButton.textContent =
           "Creating Checkout...";
+
 
         setStatus(
           "Preparing secure checkout..."
         );
 
+
         try {
 
-          const baseballNumbers =
+          const baseballs =
             Array.from(
               selectedBaseballs
             ).sort(
               (a, b) =>
                 a - b
             );
+
 
           const response =
             await fetch(
@@ -1233,19 +1383,22 @@
 
                 body:
                   JSON.stringify({
-                    player:
+                    playerKey:
                       selectedPlayerKey,
 
-                    baseball_numbers:
-                      baseballNumbers
+                    baseballs
                   })
               }
             );
 
+
           const data =
             await response.json();
 
-          if (!response.ok) {
+
+          if (
+            !response.ok
+          ) {
 
             throw new Error(
               data.error ||
@@ -1254,7 +1407,10 @@
 
           }
 
-          if (!data.url) {
+
+          if (
+            !data.url
+          ) {
 
             throw new Error(
               "Checkout URL was not returned."
@@ -1262,8 +1418,10 @@
 
           }
 
+
           window.location.href =
             data.url;
+
 
         } catch (error) {
 
@@ -1271,17 +1429,19 @@
             error
           );
 
+
           setStatus(
             error.message ||
             "Checkout is not available yet.",
             "error"
           );
 
+
           checkoutButton.disabled =
             false;
 
-          checkoutButton.textContent =
-            "Continue to Checkout";
+
+          updateSelectionSummary();
 
         }
 
@@ -1293,6 +1453,7 @@
 
       selectedPlayerKey =
         getPlayerFromURL();
+
 
       await loadFundraiser();
 
