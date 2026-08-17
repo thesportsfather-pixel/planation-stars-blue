@@ -1,53 +1,33 @@
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-    },
-  });
-}
+export async function onRequestPost(context) {
+  const { request, env } = context;
 
-async function supabaseGet(env, path) {
-  const key = env.SUPABASE_SERVICE_ROLE_KEY;
-
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/${path}`,
-    {
-      headers: {
-        apikey: key,
-        authorization: `Bearer ${key}`,
-        accept: "application/json",
-      },
-    }
-  );
-
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(
-      `Supabase ${response.status}: ${text}`
-    );
-  }
-
-  return text ? JSON.parse(text) : [];
-}
-
-export async function onRequestPost({
-  request,
-  env,
-}) {
   try {
+    const SUPABASE_URL = env.SUPABASE_URL;
+    const SUPABASE_SERVICE_ROLE_KEY =
+      env.SUPABASE_SERVICE_ROLE_KEY;
+    const STRIPE_SECRET_KEY =
+      env.STRIPE_SECRET_KEY;
+    const TEAM_KEY =
+      env.TEAM_KEY || "plantation-stars-blue";
+
     if (
-      !env.SUPABASE_URL ||
-      !env.SUPABASE_SERVICE_ROLE_KEY ||
-      !env.TEAM_KEY ||
-      !env.STRIPE_SECRET_KEY
+      !SUPABASE_URL ||
+      !SUPABASE_SERVICE_ROLE_KEY
     ) {
-      return json(
+      return jsonResponse(
         {
           error:
-            "Missing server configuration.",
+            "Supabase environment variables are missing."
+        },
+        500
+      );
+    }
+
+    if (!STRIPE_SECRET_KEY) {
+      return jsonResponse(
+        {
+          error:
+            "Stripe is not configured."
         },
         500
       );
@@ -56,154 +36,246 @@ export async function onRequestPost({
     const body =
       await request.json();
 
-    const {
-      playerKey,
-      baseballs,
-    } = body || {};
+    const playerKey =
+      body.player;
 
-    if (
-      typeof playerKey !== "string" ||
-      !Array.isArray(baseballs) ||
-      baseballs.length === 0
-    ) {
-      return json(
+    const baseballNumbers =
+      Array.isArray(
+        body.baseball_numbers
+      )
+        ? body.baseball_numbers
+        : [];
+
+    if (!playerKey) {
+      return jsonResponse(
         {
           error:
-            "A player and at least one baseball are required.",
+            "Missing player."
         },
         400
       );
     }
 
-    const selectedNumbers = [
+    if (
+      baseballNumbers.length === 0
+    ) {
+      return jsonResponse(
+        {
+          error:
+            "Select at least one baseball."
+        },
+        400
+      );
+    }
+
+    const uniqueNumbers = [
       ...new Set(
-        baseballs
-          .map((n) => Number(n))
-          .filter(
-            (n) =>
-              Number.isInteger(n) &&
-              n >= 1 &&
-              n <= 100
-          )
-      ),
+        baseballNumbers.map(Number)
+      )
     ].sort(
       (a, b) => a - b
     );
 
     if (
-      selectedNumbers.length === 0 ||
-      selectedNumbers.length !==
-        baseballs.length
+      uniqueNumbers.some(
+        number =>
+          !Number.isInteger(number) ||
+          number < 1 ||
+          number > 100
+      )
     ) {
-      return json(
+      return jsonResponse(
         {
           error:
-            "Invalid baseball selection.",
+            "Invalid baseball selection."
         },
         400
       );
     }
 
-    const teams =
-      await supabaseGet(
-        env,
-        `teams?team_key=eq.${encodeURIComponent(
-          env.TEAM_KEY
-        )}&select=id,team_key,team_name&limit=1`
+    const headers = {
+      apikey:
+        SUPABASE_SERVICE_ROLE_KEY,
+      Authorization:
+        `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type":
+        "application/json"
+    };
+
+
+    /* =========================
+       FIND TEAM
+    ========================= */
+
+    const teamResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/teams?team_key=eq.${encodeURIComponent(
+          TEAM_KEY
+        )}&select=id,team_name,team_key&limit=1`,
+        {
+          headers
+        }
       );
 
-    const team = teams[0];
-
-    if (!team) {
-      return json(
+    if (!teamResponse.ok) {
+      return jsonResponse(
         {
-          error: "Team not found.",
+          error:
+            "Unable to load team."
+        },
+        500
+      );
+    }
+
+    const teams =
+      await teamResponse.json();
+
+    if (!teams.length) {
+      return jsonResponse(
+        {
+          error:
+            "Team not found."
         },
         404
+      );
+    }
+
+    const team =
+      teams[0];
+
+
+    /* =========================
+       FIND PLAYER
+    ========================= */
+
+    const playerResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/players?team_id=eq.${team.id}&player_key=eq.${encodeURIComponent(
+          playerKey
+        )}&select=id,player_key,player_name,player_number&limit=1`,
+        {
+          headers
+        }
+      );
+
+    if (!playerResponse.ok) {
+      return jsonResponse(
+        {
+          error:
+            "Unable to load player."
+        },
+        500
       );
     }
 
     const players =
-      await supabaseGet(
-        env,
-        `players?team_id=eq.${encodeURIComponent(
-          team.id
-        )}&player_key=eq.${encodeURIComponent(
-          playerKey
-        )}&select=id,player_key,player_name,player_number&limit=1`
-      );
+      await playerResponse.json();
 
-    const player =
-      players[0];
-
-    if (!player) {
-      return json(
+    if (!players.length) {
+      return jsonResponse(
         {
-          error: "Player not found.",
+          error:
+            "Player not found."
         },
         404
       );
     }
 
-    const inList =
-      selectedNumbers.join(",");
+    const player =
+      players[0];
 
-    const rows =
-      await supabaseGet(
-        env,
-        `baseballs?player_id=eq.${encodeURIComponent(
-          player.id
-        )}&ball_number=in.(${inList})&select=id,ball_number,amount_cents,status&order=ball_number.asc`
+
+    /* =========================
+       LOAD SHARED BASEBALLS
+    ========================= */
+
+    const filter =
+      uniqueNumbers.join(",");
+
+    const baseballResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/shared_baseballs?team_id=eq.${team.id}&ball_number=in.(${filter})&select=id,ball_number,amount_cents,status`,
+        {
+          headers
+        }
       );
 
-    if (
-      !rows ||
-      rows.length !==
-        selectedNumbers.length
-    ) {
-      return json(
+    if (!baseballResponse.ok) {
+      return jsonResponse(
         {
           error:
-            "One or more baseballs could not be found.",
+            "Unable to verify baseballs."
         },
-        409
+        500
+      );
+    }
+
+    const baseballs =
+      await baseballResponse.json();
+
+    if (
+      baseballs.length !==
+      uniqueNumbers.length
+    ) {
+      return jsonResponse(
+        {
+          error:
+            "One or more baseballs could not be found."
+        },
+        400
       );
     }
 
     const unavailable =
-      rows.filter(
-        (ball) =>
-          ball.status === "sold"
+      baseballs.filter(
+        ball =>
+          ball.status !==
+          "available"
       );
 
     if (
-      unavailable.length
+      unavailable.length > 0
     ) {
-      return json(
+      return jsonResponse(
         {
           error:
-            "Baseball(s) #" +
-            unavailable
-              .map(
-                (b) =>
-                  b.ball_number
-              )
-              .join(", #") +
-            " are already sold.",
+            "One or more selected baseballs are no longer available. Please refresh the page."
         },
         409
       );
     }
 
+
+    /* =========================
+       TOTAL
+    ========================= */
+
     const totalCents =
-      rows.reduce(
-        (sum, ball) =>
-          sum +
+      baseballs.reduce(
+        (total, ball) =>
+          total +
           Number(
             ball.amount_cents || 0
           ),
         0
       );
+
+    if (
+      totalCents <= 0
+    ) {
+      return jsonResponse(
+        {
+          error:
+            "Invalid checkout amount."
+        },
+        400
+      );
+    }
+
+
+    /* =========================
+       STRIPE CHECKOUT
+    ========================= */
 
     const origin =
       new URL(
@@ -213,151 +285,139 @@ export async function onRequestPost({
     const form =
       new URLSearchParams();
 
-    form.set(
+    form.append(
       "mode",
       "payment"
     );
 
-    form.set(
+    form.append(
+      "payment_method_types[0]",
+      "card"
+    );
+
+    form.append(
       "line_items[0][price_data][currency]",
       "usd"
     );
 
-    form.set(
+    form.append(
       "line_items[0][price_data][unit_amount]",
       String(totalCents)
     );
 
-    form.set(
+    form.append(
       "line_items[0][price_data][product_data][name]",
-      `${team.team_name} Road to Cooperstown Fundraiser`
+      `Plantation Stars Blue Fundraiser — ${player.player_name}`
     );
 
-    form.set(
+    form.append(
       "line_items[0][price_data][product_data][description]",
-      `#${player.player_number} ${player.player_name} — Baseballs #${selectedNumbers.join(", #")}`
+      `Baseballs: ${uniqueNumbers
+        .map(
+          number =>
+            `#${number}`
+        )
+        .join(", ")}`
     );
 
-    form.set(
+    form.append(
       "line_items[0][quantity]",
       "1"
     );
 
-    form.set(
+    form.append(
       "success_url",
-      `${origin}/fundraiser.html?player=${encodeURIComponent(
+      `${origin}/fundraiser?player=${encodeURIComponent(
         player.player_key
-      )}&payment=success&session_id={CHECKOUT_SESSION_ID}`
+      )}&success=1`
     );
 
-    form.set(
+    form.append(
       "cancel_url",
-      `${origin}/fundraiser.html?player=${encodeURIComponent(
+      `${origin}/fundraiser?player=${encodeURIComponent(
         player.player_key
-      )}&payment=cancelled`
+      )}&canceled=1`
     );
 
-    form.set(
-      "metadata[team_id]",
-      String(team.id)
-    );
 
-    form.set(
+    /* =========================
+       METADATA
+    ========================= */
+
+    form.append(
       "metadata[team_key]",
-      team.team_key
+      TEAM_KEY
     );
 
-    form.set(
+    form.append(
+      "metadata[team_id]",
+      team.id
+    );
+
+    form.append(
       "metadata[player_id]",
-      String(player.id)
+      player.id
     );
 
-    form.set(
+    form.append(
       "metadata[player_key]",
       player.player_key
     );
 
-    form.set(
+    form.append(
       "metadata[player_name]",
       player.player_name
     );
 
-    form.set(
-      "metadata[player_number]",
-      String(
-        player.player_number
-      )
-    );
-
-    form.set(
+    form.append(
       "metadata[baseball_numbers]",
-      selectedNumbers.join(",")
+      uniqueNumbers.join(",")
     );
 
-    form.set(
-      "metadata[donation_total_cents]",
-      String(totalCents)
-    );
 
     const stripeResponse =
       await fetch(
         "https://api.stripe.com/v1/checkout/sessions",
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
-            authorization:
-              `Bearer ${env.STRIPE_SECRET_KEY}`,
+            Authorization:
+              `Bearer ${STRIPE_SECRET_KEY}`,
 
-            "content-type":
-              "application/x-www-form-urlencoded",
+            "Content-Type":
+              "application/x-www-form-urlencoded"
           },
 
           body:
-            form.toString(),
+            form.toString()
         }
       );
 
-    const stripeText =
-      await stripeResponse.text();
+    const stripeData =
+      await stripeResponse.json();
 
-    let session;
-
-    try {
-      session =
-        JSON.parse(
-          stripeText
-        );
-    } catch {
-      return json(
+    if (
+      !stripeResponse.ok
+    ) {
+      return jsonResponse(
         {
           error:
-            "Stripe returned an invalid response.",
+            stripeData?.error?.message ||
+            "Unable to create Stripe checkout."
         },
         500
       );
     }
 
-    if (
-      !stripeResponse.ok
-    ) {
-      return json(
-        {
-          error:
-            session?.error
-              ?.message ||
-            "Unable to create Stripe checkout session.",
-        },
-        stripeResponse.status
-      );
-    }
-
-    return json({
-      url: session.url,
-      sessionId:
-        session.id,
-      totalCents,
-    });
+    return jsonResponse(
+      {
+        url:
+          stripeData.url
+      },
+      200
+    );
 
   } catch (error) {
     console.error(
@@ -365,14 +425,33 @@ export async function onRequestPost({
       error
     );
 
-    return json(
+    return jsonResponse(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : String(error),
+          "Unexpected server error."
       },
       500
     );
   }
+}
+
+
+function jsonResponse(
+  data,
+  status = 200
+) {
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        "Cache-Control":
+          "no-store"
+      }
+    }
+  );
 }
