@@ -7,14 +7,19 @@ export async function onRequestGet(context) {
 
     if (!playerKey) {
       return jsonResponse(
-        { error: "Missing player." },
+        {
+          success: false,
+          error: "Missing player."
+        },
         400
       );
     }
 
     const SUPABASE_URL = env.SUPABASE_URL;
+
     const SUPABASE_SERVICE_ROLE_KEY =
       env.SUPABASE_SERVICE_ROLE_KEY;
+
     const TEAM_KEY =
       env.TEAM_KEY || "plantation-stars-blue";
 
@@ -24,6 +29,7 @@ export async function onRequestGet(context) {
     ) {
       return jsonResponse(
         {
+          success: false,
           error:
             "Supabase environment variables are missing."
         },
@@ -33,9 +39,12 @@ export async function onRequestGet(context) {
 
     const headers = {
       apikey: SUPABASE_SERVICE_ROLE_KEY,
+
       Authorization:
         `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      "Content-Type": "application/json"
+
+      "Content-Type":
+        "application/json"
     };
 
 
@@ -43,14 +52,15 @@ export async function onRequestGet(context) {
        FIND TEAM
     ========================= */
 
-    const teamResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/teams?team_key=eq.${encodeURIComponent(
-        TEAM_KEY
-      )}&select=id,team_name,team_key&limit=1`,
-      {
-        headers
-      }
-    );
+    const teamResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/teams?team_key=eq.${encodeURIComponent(
+          TEAM_KEY
+        )}&select=id,team_name,team_key&limit=1`,
+        {
+          headers
+        }
+      );
 
     if (!teamResponse.ok) {
       console.error(
@@ -59,7 +69,10 @@ export async function onRequestGet(context) {
       );
 
       return jsonResponse(
-        { error: "Unable to load team." },
+        {
+          success: false,
+          error: "Unable to load team."
+        },
         500
       );
     }
@@ -69,7 +82,10 @@ export async function onRequestGet(context) {
 
     if (!teams.length) {
       return jsonResponse(
-        { error: "Team not found." },
+        {
+          success: false,
+          error: "Team not found."
+        },
         404
       );
     }
@@ -78,17 +94,18 @@ export async function onRequestGet(context) {
 
 
     /* =========================
-       FIND SELECTED PLAYER
+       FIND PLAYER
     ========================= */
 
-    const playerResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/players?team_id=eq.${team.id}&player_key=eq.${encodeURIComponent(
-        playerKey
-      )}&select=id,player_key,player_name,player_number&limit=1`,
-      {
-        headers
-      }
-    );
+    const playerResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/players?team_id=eq.${team.id}&player_key=eq.${encodeURIComponent(
+          playerKey
+        )}&select=id,player_key,player_name,player_number&limit=1`,
+        {
+          headers
+        }
+      );
 
     if (!playerResponse.ok) {
       console.error(
@@ -97,7 +114,10 @@ export async function onRequestGet(context) {
       );
 
       return jsonResponse(
-        { error: "Unable to load player." },
+        {
+          success: false,
+          error: "Unable to load player."
+        },
         500
       );
     }
@@ -107,7 +127,10 @@ export async function onRequestGet(context) {
 
     if (!players.length) {
       return jsonResponse(
-        { error: "Player not found." },
+        {
+          success: false,
+          error: "Player not found."
+        },
         404
       );
     }
@@ -116,24 +139,27 @@ export async function onRequestGet(context) {
 
 
     /* =========================
-       LOAD ONE SHARED TEAM BOARD
+       LOAD THIS PLAYER'S
+       INDIVIDUAL BOARD
     ========================= */
 
-    const baseballResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/shared_baseballs?team_id=eq.${team.id}&select=id,ball_number,amount_cents,status,supported_player_id,sold_at&order=ball_number.asc`,
-      {
-        headers
-      }
-    );
+    const baseballResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/baseballs?player_id=eq.${player.id}&select=id,ball_number,amount_cents,status,reserved_until,sold_at,stripe_session_id&order=ball_number.asc`,
+        {
+          headers
+        }
+      );
 
     if (!baseballResponse.ok) {
       console.error(
-        "Shared baseball lookup error:",
+        "Baseball lookup error:",
         await baseballResponse.text()
       );
 
       return jsonResponse(
         {
+          success: false,
           error:
             "Unable to load baseball board."
         },
@@ -146,68 +172,56 @@ export async function onRequestGet(context) {
 
 
     /* =========================
-       LOAD HISTORICAL ADJUSTMENTS
-    ========================= */
-
-    const adjustmentResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/shared_board_adjustments?team_id=eq.${team.id}&select=amount_cents`,
-      {
-        headers
-      }
-    );
-
-    if (!adjustmentResponse.ok) {
-      console.error(
-        "Adjustment lookup error:",
-        await adjustmentResponse.text()
-      );
-
-      return jsonResponse(
-        {
-          error:
-            "Unable to load historical fundraiser totals."
-        },
-        500
-      );
-    }
-
-    const adjustments =
-      await adjustmentResponse.json();
-
-
-    /* =========================
-       NORMALIZE BOARD
+       NORMALIZE STATUSES
     ========================= */
 
     const baseballs =
       baseballRows.map(ball => {
-        let displayStatus =
-          ball.status;
+        let status = ball.status;
 
-        if (
-          displayStatus === "reserved"
-        ) {
-          displayStatus = "sold";
+        if (status === "reserved") {
+          if (!ball.reserved_until) {
+            status = "available";
+          } else {
+            const reservedUntil =
+              new Date(
+                ball.reserved_until
+              ).getTime();
+
+            if (
+              !Number.isFinite(reservedUntil) ||
+              reservedUntil <= Date.now()
+            ) {
+              status = "available";
+            }
+          }
         }
 
         return {
           id: ball.id,
+
           ball_number:
             ball.ball_number,
+
           amount_cents:
             ball.amount_cents,
-          status:
-            displayStatus,
-          supported_player_id:
-            ball.supported_player_id,
+
+          status,
+
+          reserved_until:
+            ball.reserved_until,
+
           sold_at:
-            ball.sold_at
+            ball.sold_at,
+
+          stripe_session_id:
+            ball.stripe_session_id
         };
       });
 
 
     /* =========================
-       CALCULATE TOTALS
+       PLAYER TOTALS
     ========================= */
 
     const soldBalls =
@@ -216,7 +230,7 @@ export async function onRequestGet(context) {
           ball.status === "sold"
       );
 
-    const sharedRaisedCents =
+    const raisedCents =
       soldBalls.reduce(
         (total, ball) =>
           total +
@@ -226,29 +240,17 @@ export async function onRequestGet(context) {
         0
       );
 
-    const adjustmentCents =
-      adjustments.reduce(
-        (total, row) =>
-          total +
-          Number(
-            row.amount_cents || 0
-          ),
-        0
-      );
-
-    const raisedCents =
-      sharedRaisedCents +
-      adjustmentCents;
-
     const soldCount =
       soldBalls.length;
 
     const remainingCount =
-      baseballRows.filter(
+      baseballs.filter(
         ball =>
-          ball.status ===
-          "available"
+          ball.status === "available"
       ).length;
+
+    const goalCents =
+      505000;
 
 
     /* =========================
@@ -257,38 +259,33 @@ export async function onRequestGet(context) {
 
     return jsonResponse(
       {
+        success: true,
+
         team: {
           id: team.id,
-          team_name:
-            team.team_name,
-          team_key:
-            team.team_key
+          key: team.team_key,
+          name: team.team_name
         },
 
         player: {
           id: player.id,
-          player_key:
-            player.player_key,
-          player_name:
-            player.player_name,
-          player_number:
-            player.player_number
+          key: player.player_key,
+          name: player.player_name,
+          number: player.player_number
         },
 
         baseballs,
 
         totals: {
-          raised_cents:
-            raisedCents,
+          raisedCents,
+          raisedDollars:
+            raisedCents / 100,
 
-          sold_count:
-            soldCount,
+          goalCents,
+          goalDollars: 5050,
 
-          remaining_count:
-            remainingCount,
-
-          goal_cents:
-            505000
+          soldCount,
+          remainingCount
         }
       },
       200
@@ -302,6 +299,7 @@ export async function onRequestGet(context) {
 
     return jsonResponse(
       {
+        success: false,
         error:
           "Unexpected server error."
       },
